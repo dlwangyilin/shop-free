@@ -20,6 +20,8 @@ export class ProductListComponent implements OnInit {
   thePageSize: number = 5;
   theTotalElements: number = 0;
 
+  previousKeyword :string = null;
+
   constructor(private productService: ProductService,
               private route: ActivatedRoute) { }
 
@@ -62,11 +64,14 @@ export class ProductListComponent implements OnInit {
 
   handleSearchProducts() {
     const theKeyword: string = this.route.snapshot.paramMap.get('keyword');
-    this.productService.searchProducts(theKeyword).subscribe(
-      data => {
-        this.products = data;
-      }
-    );
+    // reset page number
+    if (this.previousKeyword != theKeyword) {
+      this.thePageNumber = 1;
+    }
+    this.previousKeyword = theKeyword;
+    this.productService
+      .searchProductsPaginate(this.thePageNumber - 1, this.thePageSize, theKeyword)
+      .subscribe(this.processResult());
   }
 
   processResult() {
